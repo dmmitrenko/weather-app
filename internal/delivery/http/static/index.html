@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Forecast API Frontend</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    section {
+      margin-bottom: 2em;
+    }
+    section:last-child {
+      margin-bottom: 0;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.2em;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 0.3em;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin: 0.5em 0 0.2em;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="email"],
+    select {
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    button {
+      margin-top: 1em;
+      padding: 0.7em;
+      font-size: 1em;
+      border: none;
+      border-radius: 4px;
+      background-color: #0288d1;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0277bd;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 0.3em;
+    }
+    .result {
+      margin-top: 1em;
+      padding: 1em;
+      background: #e3f2fd;
+      border-radius: 4px;
+    }
+    .error {
+      margin-top: 1em;
+      padding: 1em;
+      background: #ffebee;
+      color: #c62828;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Weather Forecast API</h1>
+
+    <section>
+      <h2>1. Отримати поточну погоду</h2>
+      <form id="weather-form" method="get" action="/weather">
+        <label for="city-weather">Місто</label>
+        <input type="text" id="city-weather" name="city" placeholder="Київ" required />
+        <button type="submit">Отримати погоду</button>
+      </form>
+      <div id="result"></div>
+    </section>
+
+    <section>
+      <h2>2. Підписка на оновлення</h2>
+      <form method="post" action="https://weatherapi.app/api/subscribe">
+        <label for="email-sub">Email</label>
+        <input type="email" id="email-sub" name="email" placeholder="you@example.com" required />
+
+        <label for="city-sub">Місто</label>
+        <input type="text" id="city-sub" name="city" placeholder="Львів" required />
+
+        <label for="freq-sub">Частота</label>
+        <select id="freq-sub" name="frequency" required>
+          <option value="">— оберіть —</option>
+          <option value="hourly">Щогодини</option>
+          <option value="daily">Щодня</option>
+        </select>
+
+        <button type="submit">Підписатися</button>
+      </form>
+      <p class="note">POST /api/subscribe</p>
+    </section>
+
+    <section>
+      <h2>3. Підтвердження підписки</h2>
+      <form method="get" action="https://weatherapi.app/api/confirm/">
+        <label for="token-confirm">Токен підтвердження</label>
+        <input type="text" id="token-confirm" name="token" placeholder="abcdef123456" required />
+        <button type="submit">Підтвердити</button>
+      </form>
+      <p class="note">GET /api/confirm/{token}</p>
+    </section>
+
+    <section>
+      <h2>4. Відписка</h2>
+      <form method="get" action="https://weatherapi.app/api/unsubscribe/">
+        <label for="token-unsub">Токен відписки</label>
+        <input type="text" id="token-unsub" name="token" placeholder="uvwxyz7890" required />
+        <button type="submit">Відписатися</button>
+      </form>
+      <p class="note">GET /api/unsubscribe/{token}</p>
+    </section>
+  </div>
+
+  <script>
+    const form = document.getElementById('weather-form');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const city = document.getElementById('city-weather').value.trim();
+      if (!city) return;
+      resultDiv.textContent = 'Завантаження...';
+
+      try {
+        const res = await fetch(`/weather?city=${encodeURIComponent(city)}`);
+        if (!res.ok) throw new Error(`Помилка: ${res.status}`);
+        const data = await res.json();
+
+        resultDiv.innerHTML = `
+          <div class="result">
+            <h3>Поточна погода в ${city}:</h3>
+            <p><strong>Температура:</strong> ${data.temperature} °C</p>
+            <p><strong>Вологість:</strong> ${data.humidity}%</p>
+            <p><strong>Опис:</strong> ${data.description}</p>
+          </div>`;
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="error">${err.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
