@@ -5,8 +5,15 @@ import (
 	"net/http"
 
 	"github.com/dmmitrenko/weather-app/internal/application"
+	"github.com/dmmitrenko/weather-app/internal/domain"
 	"github.com/gorilla/mux"
 )
+
+type WeatherResponse struct {
+	Temperature float64 `json:"temperature"`
+	Humidity    float64 `json:"humidity"`
+	Description string  `json:"description"`
+}
 
 type WeatherHandler struct {
 	weatherService *application.WeatherService
@@ -21,19 +28,29 @@ func NewWeatherHandler(r *mux.Router, w *application.WeatherService) {
 }
 
 func (h *WeatherHandler) GetCurrentWeather(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	city := r.URL.Query().Get("city")
 	if city == "" {
 		http.Error(w, "city required", http.StatusBadRequest)
 		return
 	}
 
-	weather, err := h.weatherService.GetCurrentWeather(ctx, city)
+	weather, err := h.weatherService.GetCurrentWeather(r.Context(), city)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err == domain.ErrCityNotFound {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 
+	resp := WeatherResponse{
+		Temperature: weather.Temperature,
+		Humidity:    float64(weather.Humidity),
+		Description: weather.Description,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(weather)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(resp)
 }

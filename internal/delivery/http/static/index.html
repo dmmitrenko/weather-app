@@ -87,57 +87,54 @@
 </head>
 <body>
   <div class="container">
-    <h1>Weather Forecast API</h1>
+    <h1>Weather Forecast App</h1>
 
     <section>
-      <h2>1. Отримати поточну погоду</h2>
+      <h2>Get current weather</h2>
       <form id="weather-form" method="get" action="/weather">
-        <label for="city-weather">Місто</label>
-        <input type="text" id="city-weather" name="city" placeholder="Київ" required />
-        <button type="submit">Отримати погоду</button>
+        <label for="city-weather">City</label>
+        <input type="text" id="city-weather" name="city" placeholder="Odesa" required />
+        <button type="submit">Get the weather forecast</button>
       </form>
       <div id="result"></div>
     </section>
 
     <section>
-      <h2>2. Підписка на оновлення</h2>
+      <h2>Subscribe to weather forecasts</h2>
       <form method="post" action="https://weatherapi.app/api/subscribe">
         <label for="email-sub">Email</label>
         <input type="email" id="email-sub" name="email" placeholder="you@example.com" required />
 
-        <label for="city-sub">Місто</label>
-        <input type="text" id="city-sub" name="city" placeholder="Львів" required />
+        <label for="city-sub">City</label>
+        <input type="text" id="city-sub" name="city" placeholder="Kharkiv" required />
 
-        <label for="freq-sub">Частота</label>
+        <label for="freq-sub">Frequency</label>
         <select id="freq-sub" name="frequency" required>
-          <option value="">— оберіть —</option>
-          <option value="hourly">Щогодини</option>
-          <option value="daily">Щодня</option>
+          <option value="">- choose -</option>
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
         </select>
 
-        <button type="submit">Підписатися</button>
+        <button type="submit">Subscribe</button>
       </form>
-      <p class="note">POST /api/subscribe</p>
     </section>
 
     <section>
-      <h2>3. Підтвердження підписки</h2>
+      <h2>Subscription confirmation</h2>
       <form method="get" action="https://weatherapi.app/api/confirm/">
-        <label for="token-confirm">Токен підтвердження</label>
+        <label for="token-confirm">Confirmation token</label>
         <input type="text" id="token-confirm" name="token" placeholder="abcdef123456" required />
-        <button type="submit">Підтвердити</button>
+        <button type="submit">Confirm</button>
       </form>
-      <p class="note">GET /api/confirm/{token}</p>
     </section>
 
     <section>
-      <h2>4. Відписка</h2>
+      <h2>Unsubscribe</h2>
       <form method="get" action="https://weatherapi.app/api/unsubscribe/">
-        <label for="token-unsub">Токен відписки</label>
+        <label for="token-unsub">Unsubscribe token</label>
         <input type="text" id="token-unsub" name="token" placeholder="uvwxyz7890" required />
-        <button type="submit">Відписатися</button>
+        <button type="submit">Unsubscribe</button>
       </form>
-      <p class="note">GET /api/unsubscribe/{token}</p>
     </section>
   </div>
 
@@ -149,19 +146,22 @@
       e.preventDefault();
       const city = document.getElementById('city-weather').value.trim();
       if (!city) return;
-      resultDiv.textContent = 'Завантаження...';
+      resultDiv.textContent = 'Loading...';
 
       try {
         const res = await fetch(`/weather?city=${encodeURIComponent(city)}`);
-        if (!res.ok) throw new Error(`Помилка: ${res.status}`);
+        if (!res.ok) {
+        const errMsg = await res.text();
+        throw new Error(errMsg || `Error: ${res.status}`);
+      }
         const data = await res.json();
 
         resultDiv.innerHTML = `
           <div class="result">
-            <h3>Поточна погода в ${city}:</h3>
-            <p><strong>Температура:</strong> ${data.temperature} °C</p>
-            <p><strong>Вологість:</strong> ${data.humidity}%</p>
-            <p><strong>Опис:</strong> ${data.description}</p>
+            <h3>The current weather in ${city}:</h3>
+            <p><strong>Temperature:</strong> ${data.temperature} °C</p>
+            <p><strong>Humidity:</strong> ${data.humidity}%</p>
+            <p><strong>Description:</strong> ${data.description}</p>
           </div>`;
       } catch (err) {
         resultDiv.innerHTML = `<div class="error">${err.message}</div>`;

@@ -1,9 +1,12 @@
 package weatherapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,6 +14,13 @@ import (
 )
 
 const endpoint = "https://api.weatherapi.com/v1/current.json"
+
+type apiError struct {
+	Error struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	} `json:"error"`
+}
 
 type Client struct {
 	apiKey     string
@@ -64,8 +74,28 @@ func (c *Client) GetCurrentWeather(ctx context.Context, city string) (domain.Wea
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return domain.Weather{}, fmt.Errorf("weatherapi: status %d", resp.StatusCode)
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return domain.Weather{}, err
+	}
+
+	var ferr apiError
+	if err := json.Unmarshal(raw, &ferr); err == nil && ferr.Error.Message != "" {
+		log.Printf("WeatherAPI error %d: %s", ferr.Error.Code, ferr.Error.Message)
+		if ferr.Error.Code == 1006 {
+			return domain.Weather{}, domain.ErrCityNotFound
+		}
+		return domain.Weather{}, fmt.Errorf("weatherapi error %d: %s", ferr.Error.Code, ferr.Error.Message)
+	}
+
+	resp.Body = io.NopCloser(bytes.NewBuffer(raw))
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+	case http.StatusBadRequest:
+		return domain.Weather{}, fmt.Errorf("bad request to WeatherAPI")
+	default:
+		return domain.Weather{}, fmt.Errorf("weatherapi: unexpected status %d", resp.StatusCode)
 	}
 
 	var apiRes apiResponse
