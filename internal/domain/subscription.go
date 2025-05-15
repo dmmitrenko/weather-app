@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type Subscription struct {
 	Id        uuid.UUID `json:"id"`
@@ -12,9 +16,9 @@ type Subscription struct {
 }
 
 type SubscriptionRepository interface {
-	Create(sub *Subscription) error
-	GetByToken(token string) (*Subscription, error)
-	ConfirmByToken(token string) error
-	DeleteByToken(token string) error
-	GetActiveSubscriptions(frequency Frequency) error
+	Create(ctx context.Context, sub *Subscription) error
+	GetByToken(ctx context.Context, token string) (*Subscription, error)
+	ConfirmByToken(ctx context.Context, token string) error
+	DeleteByToken(ctx context.Context, token string) error
+	GetActiveSubscriptions(ctx context.Context, freq Frequency) ([]Subscription, error)
 }

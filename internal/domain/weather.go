@@ -19,3 +19,7 @@ type Weather struct {
 type WeatherProvider interface {
 	GetCurrentWeather(ctx context.Context, city string) (Weather, error)
 }
+
+type EmailSender interface {
+	Send(ctx context.Context, to, subject, body string) error
+}

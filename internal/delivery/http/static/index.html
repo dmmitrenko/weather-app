@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Weather Forecast API Frontend</title>
+  <title>Weather Forecast App</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -70,18 +70,15 @@
       color: #666;
       margin-top: 0.3em;
     }
-    .result {
+    .result, .subscribe-result, .confirm-result, .unsubscribe-result {
       margin-top: 1em;
       padding: 1em;
-      background: #e3f2fd;
       border-radius: 4px;
     }
+    .result { background: #e3f2fd; }
     .error {
-      margin-top: 1em;
-      padding: 1em;
       background: #ffebee;
       color: #c62828;
-      border-radius: 4px;
     }
   </style>
 </head>
@@ -96,12 +93,12 @@
         <input type="text" id="city-weather" name="city" placeholder="Odesa" required />
         <button type="submit">Get the weather forecast</button>
       </form>
-      <div id="result"></div>
+      <div id="result" class="result"></div>
     </section>
 
     <section>
       <h2>Subscribe to weather forecasts</h2>
-      <form method="post" action="https://weatherapi.app/api/subscribe">
+      <form id="subscribe-form" method="post" action="/subscribe">
         <label for="email-sub">Email</label>
         <input type="email" id="email-sub" name="email" placeholder="you@example.com" required />
 
@@ -117,56 +114,90 @@
 
         <button type="submit">Subscribe</button>
       </form>
+      <div id="subscribe-result" class="subscribe-result"></div>
     </section>
 
     <section>
       <h2>Subscription confirmation</h2>
-      <form method="get" action="https://weatherapi.app/api/confirm/">
+      <form id="confirm-form" method="get" action="/confirm/">
         <label for="token-confirm">Confirmation token</label>
         <input type="text" id="token-confirm" name="token" placeholder="abcdef123456" required />
         <button type="submit">Confirm</button>
       </form>
+      <div id="confirm-result" class="confirm-result"></div>
     </section>
 
     <section>
       <h2>Unsubscribe</h2>
-      <form method="get" action="https://weatherapi.app/api/unsubscribe/">
+      <form id="unsubscribe-form" method="get" action="/unsubscribe/">
         <label for="token-unsub">Unsubscribe token</label>
         <input type="text" id="token-unsub" name="token" placeholder="uvwxyz7890" required />
         <button type="submit">Unsubscribe</button>
       </form>
+      <div id="unsubscribe-result" class="unsubscribe-result"></div>
     </section>
   </div>
 
   <script>
-    const form = document.getElementById('weather-form');
-    const resultDiv = document.getElementById('result');
-
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('weather-form').addEventListener('submit', async e => {
       e.preventDefault();
       const city = document.getElementById('city-weather').value.trim();
+      const resultEl = document.getElementById('result');
       if (!city) return;
-      resultDiv.textContent = 'Loading...';
+      resultEl.textContent = 'Loading...';
 
       try {
         const res = await fetch(`/weather?city=${encodeURIComponent(city)}`);
         if (!res.ok) {
-        const errMsg = await res.text();
-        throw new Error(errMsg || `Error: ${res.status}`);
-      }
+          const errMsg = await res.text();
+          throw new Error(errMsg || `Error: ${res.status}`);
+        }
         const data = await res.json();
-
-        resultDiv.innerHTML = `
-          <div class="result">
-            <h3>The current weather in ${city}:</h3>
-            <p><strong>Temperature:</strong> ${data.temperature} °C</p>
-            <p><strong>Humidity:</strong> ${data.humidity}%</p>
-            <p><strong>Description:</strong> ${data.description}</p>
-          </div>`;
+        resultEl.innerHTML = `
+          <h3>The current weather in ${city}:</h3>
+          <p><strong>Temperature:</strong> ${data.temperature} °C</p>
+          <p><strong>Humidity:</strong> ${data.humidity}%</p>
+          <p><strong>Description:</strong> ${data.description}</p>
+        `;
       } catch (err) {
-        resultDiv.innerHTML = `<div class="error">${err.message}</div>`;
+        resultEl.innerHTML = `<div class="error">${err.message}</div>`;
       }
     });
+
+    function handleForm(formId, resultId) {
+      const form = document.getElementById(formId);
+      const result = document.getElementById(resultId);
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        let url = form.action;
+        const method = form.method.toUpperCase();
+        let opts = { method };
+
+        if (method === 'GET') {
+          const tokenField = form.token;
+          if (tokenField) {
+            url += encodeURIComponent(tokenField.value.trim());
+          }
+        } else if (method === 'POST') {
+          opts.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+          opts.body = new URLSearchParams(new FormData(form));
+        }
+
+        result.textContent = 'Loading...';
+        try {
+          const res = await fetch(url, opts);
+          const text = await res.text();
+          if (!res.ok) throw new Error(text || res.statusText);
+          result.textContent = 'Success!';
+        } catch (err) {
+          result.innerHTML = `<div class="error">${err.message}</div>`;
+        }
+      });
+    }
+
+    handleForm('subscribe-form', 'subscribe-result');
+    handleForm('confirm-form',   'confirm-result');
+    handleForm('unsubscribe-form','unsubscribe-result');
   </script>
 </body>
 </html>
