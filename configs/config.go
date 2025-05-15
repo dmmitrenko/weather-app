@@ -27,6 +27,9 @@ type Config struct {
 		Password string `yaml:"password"`
 		From     string `yaml:"from"`
 	} `yaml:"smtp_config"`
+	Token struct {
+		Secret string `yaml:"secret"`
+	} `yaml:"token"`
 }
 
 func Load(path string) (*Config, error) {

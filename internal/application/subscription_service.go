@@ -19,13 +19,11 @@ func NewSubscriptionService(r domain.SubscriptionRepository, emailSender domain.
 }
 
 func (s *SubscriptionService) ConfirmSubscription(ctx context.Context, token string) error {
-	hash := domain.ComputeTokenHash(token, "test-secret")
-	return s.repository.ConfirmByToken(ctx, hash)
+	return s.repository.ConfirmByToken(ctx, token)
 }
 
 func (s *SubscriptionService) Subscribe(ctx context.Context, email string, freq domain.Frequency, city string) error {
 	token, err := domain.GenerateToken()
-	token_hash := domain.ComputeTokenHash(token, "test-secret")
 	if err != nil {
 		return err
 	}
@@ -36,7 +34,7 @@ func (s *SubscriptionService) Subscribe(ctx context.Context, email string, freq 
 		City:      city,
 		Frequency: freq,
 		Email:     email,
-		Token:     token_hash,
+		Token:     token,
 	}
 
 	s.repository.Create(ctx, &sub)
@@ -44,6 +42,5 @@ func (s *SubscriptionService) Subscribe(ctx context.Context, email string, freq 
 }
 
 func (s *SubscriptionService) Unsubscribe(ctx context.Context, token string) error {
-	hash := domain.ComputeTokenHash(token, "test-secret")
-	return s.repository.DeleteByToken(ctx, hash)
+	return s.repository.DeleteByToken(ctx, token)
 }

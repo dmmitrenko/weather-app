@@ -49,7 +49,7 @@ func main() {
 		From:     cfg.SMTP.From,
 	})
 
-	subscriptionRepository := repository.NewSubscriptionRepository(db)
+	subscriptionRepository := repository.NewSubscriptionRepository(db, cfg.Token.Secret)
 
 	processor := &application.SubscriptionProcessor{Repo: subscriptionRepository, Sender: email_sender}
 	subscriptionService := application.NewSubscriptionService(subscriptionRepository, email_sender)

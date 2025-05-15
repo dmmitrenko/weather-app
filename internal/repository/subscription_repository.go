@@ -9,11 +9,15 @@ import (
 )
 
 type SubscriptionRepository struct {
-	db *sql.DB
+	db          *sql.DB
+	tokenSecret string
 }
 
-func NewSubscriptionRepository(db *sql.DB) *SubscriptionRepository {
-	return &SubscriptionRepository{db: db}
+func NewSubscriptionRepository(db *sql.DB, tokenSecret string) *SubscriptionRepository {
+	return &SubscriptionRepository{
+		db:          db,
+		tokenSecret: tokenSecret,
+	}
 }
 
 func (r *SubscriptionRepository) Create(
@@ -26,6 +30,7 @@ func (r *SubscriptionRepository) Create(
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
     `
+	hash := domain.ComputeTokenHash(sub.Token, r.tokenSecret)
 	return r.db.
 		QueryRowContext(
 			ctx,
@@ -33,7 +38,7 @@ func (r *SubscriptionRepository) Create(
 			sub.Email,
 			sub.City,
 			string(sub.Frequency),
-			sub.Token,
+			hash,
 			sub.Confirmed,
 		).
 		Scan(&sub.Id)
@@ -44,11 +49,12 @@ func (r *SubscriptionRepository) GetByToken(
 	token string,
 ) (*domain.Subscription, error) {
 	const query = `
-        SELECT id, email, city, frequency, token_hash, confirmed
+        SELECT id, email, city, frequency, confirmed
         FROM subscriptions
-        WHERE token_hash = $1
+        WHERE token = $1
     `
-	row := r.db.QueryRowContext(ctx, query, token)
+	hash := domain.ComputeTokenHash(token, r.tokenSecret)
+	row := r.db.QueryRowContext(ctx, query, hash)
 
 	var s domain.Subscription
 	var freq string
@@ -57,7 +63,6 @@ func (r *SubscriptionRepository) GetByToken(
 		&s.Email,
 		&s.City,
 		&freq,
-		&s.Token,
 		&s.Confirmed,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -78,7 +83,8 @@ func (r *SubscriptionRepository) ConfirmByToken(
         SET confirmed = TRUE
         WHERE token = $1
     `
-	res, err := r.db.ExecContext(ctx, query, token)
+	hash := domain.ComputeTokenHash(token, r.tokenSecret)
+	res, err := r.db.ExecContext(ctx, query, hash)
 	if err != nil {
 		return err
 	}
@@ -95,8 +101,8 @@ func (r *SubscriptionRepository) DeleteByToken(ctx context.Context, token string
         DELETE FROM subscriptions
         WHERE token = $1
     `
-
-	res, err := r.db.ExecContext(ctx, query, token)
+	hash := domain.ComputeTokenHash(token, r.tokenSecret)
+	res, err := r.db.ExecContext(ctx, query, hash)
 	if err != nil {
 		return err
 	}
@@ -115,7 +121,7 @@ func (r *SubscriptionRepository) GetActiveSubscriptions(
 	freq domain.Frequency,
 ) ([]domain.Subscription, error) {
 	const query = `
-        SELECT id, email, city, token, confirmed
+        SELECT id, email, city, confirmed
         FROM subscriptions
         WHERE frequency = $1 AND confirmed = TRUE
     `
@@ -134,7 +140,6 @@ func (r *SubscriptionRepository) GetActiveSubscriptions(
 			&s.Id,
 			&s.Email,
 			&s.City,
-			&s.Token,
 			&s.Confirmed,
 		); err != nil {
 			return nil, err
