@@ -9,6 +9,7 @@ import (
 	"github.com/dmmitrenko/weather-app/configs"
 	"github.com/dmmitrenko/weather-app/internal/application"
 	delivery "github.com/dmmitrenko/weather-app/internal/delivery/http"
+	"github.com/dmmitrenko/weather-app/internal/infrastructure/cron"
 	"github.com/dmmitrenko/weather-app/internal/infrastructure/emailing"
 	weatherapi "github.com/dmmitrenko/weather-app/internal/infrastructure/weather-api"
 	"github.com/dmmitrenko/weather-app/internal/repository"
@@ -50,14 +51,17 @@ func main() {
 
 	subscriptionRepository := repository.NewSubscriptionRepository(db)
 
+	processor := &application.SubscriptionProcessor{Repo: subscriptionRepository, Sender: email_sender}
 	subscriptionService := application.NewSubscriptionService(subscriptionRepository, email_sender)
-	weatherService := application.NewWeatherService(client)
 
 	r := mux.NewRouter()
-	delivery.NewWeatherHandler(r, weatherService)
+	delivery.NewWeatherHandler(r, client)
 	delivery.NewSubscriptionHandler(r, subscriptionService)
 
 	delivery.RegisterStatic(r)
+
+	scheduler := cron.StartJobs(processor)
+	defer scheduler.Stop()
 
 	log.Printf("Listening on %s", cfg.Server.Address)
 	log.Fatal(http.ListenAndServe(cfg.Server.Address, r))

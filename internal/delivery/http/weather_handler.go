@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/dmmitrenko/weather-app/internal/application"
 	"github.com/dmmitrenko/weather-app/internal/domain"
 	"github.com/gorilla/mux"
 )
@@ -16,12 +15,12 @@ type WeatherResponse struct {
 }
 
 type WeatherHandler struct {
-	weatherService *application.WeatherService
+	weatherProvider domain.WeatherProvider
 }
 
-func NewWeatherHandler(r *mux.Router, w *application.WeatherService) {
+func NewWeatherHandler(r *mux.Router, w domain.WeatherProvider) {
 	h := &WeatherHandler{
-		weatherService: w,
+		weatherProvider: w,
 	}
 
 	r.HandleFunc("/weather", h.GetCurrentWeather).Methods("GET")
@@ -34,7 +33,7 @@ func (h *WeatherHandler) GetCurrentWeather(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	weather, err := h.weatherService.GetCurrentWeather(r.Context(), city)
+	weather, err := h.weatherProvider.GetCurrentWeather(r.Context(), city)
 	if err != nil {
 		if err == domain.ErrCityNotFound {
 			http.Error(w, err.Error(), http.StatusBadRequest)
