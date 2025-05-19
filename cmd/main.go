@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/dmmitrenko/weather-app/configs"
 	"github.com/dmmitrenko/weather-app/internal/application"
@@ -16,6 +17,11 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
+
+func init() {
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 func main() {
 	cfg, err := configs.Load("configs/config.yaml")

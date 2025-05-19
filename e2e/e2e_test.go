@@ -1,6 +1,7 @@
 package e2e_test
 
 import (
+	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -13,6 +14,23 @@ func getBaseURL() string {
 		return url
 	}
 	return "http://app:8080"
+}
+
+func waitForReady() {
+	url := getBaseURL() + "/api/weather?city=London"
+	for i := 0; i < 30; i++ {
+		resp, err := http.Get(url)
+		if err == nil {
+			resp.Body.Close()
+			return
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func TestMain(m *testing.M) {
+	waitForReady()
+	os.Exit(m.Run())
 }
 
 func TestE2E(t *testing.T) {

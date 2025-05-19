@@ -44,18 +44,5 @@ services:
     volumes:
       - ./configs/config.yaml:/app/configs/config.yaml:ro
 
-  e2e:
-    image: golang:1.24
-    working_dir: /app
-    volumes:
-      - ./:/app
-    env_file:
-      - .env
-    environment:
-      - E2E_BASE_URL=http://app:8080
-    depends_on:
-      - app
-    command: ["go", "test", "./e2e", "-timeout", "5m", "-v"]
-
 volumes:
   db_data:
