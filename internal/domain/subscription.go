@@ -21,4 +21,5 @@ type SubscriptionRepository interface {
 	ConfirmByToken(ctx context.Context, token string) error
 	DeleteByToken(ctx context.Context, token string) error
 	GetActiveSubscriptions(ctx context.Context, freq Frequency) ([]Subscription, error)
+	IsExists(ctx context.Context, email string) (bool, error)
 }

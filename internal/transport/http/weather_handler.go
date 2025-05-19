@@ -36,7 +36,7 @@ func (h *WeatherHandler) GetCurrentWeather(w http.ResponseWriter, r *http.Reques
 	weather, err := h.weatherProvider.GetCurrentWeather(r.Context(), city)
 	if err != nil {
 		if err == domain.ErrCityNotFound {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		http.Error(w, "something went wrong", http.StatusInternalServerError)

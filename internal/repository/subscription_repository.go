@@ -155,3 +155,18 @@ func (r *SubscriptionRepository) GetActiveSubscriptions(
 
 	return subs, nil
 }
+
+func (r *SubscriptionRepository) IsExists(ctx context.Context, email string) (bool, error) {
+	const query = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM subscriptions
+            WHERE email = $1
+        )
+    `
+	var exists bool
+	if err := r.db.QueryRowContext(ctx, query, email).Scan(&exists); err != nil {
+		return false, err
+	}
+	return exists, nil
+}

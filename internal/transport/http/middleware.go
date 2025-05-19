@@ -27,6 +27,8 @@ func WithErrorHandling(fn AppHandler) http.HandlerFunc {
 			code, msg = http.StatusNotFound, "Token not found"
 		case errors.Is(err, domain.ErrInvalidToken):
 			code, msg = http.StatusBadRequest, "Invalid token"
+		case errors.Is(err, domain.ErrCityNotFound):
+			code, msg = http.StatusNotFound, "City not found"
 		}
 
 		http.Error(w, msg, code)

@@ -25,6 +25,14 @@ func (s *SubscriptionService) ConfirmSubscription(ctx context.Context, token str
 }
 
 func (s *SubscriptionService) Subscribe(ctx context.Context, email string, freq domain.Frequency, city string) error {
+	alreadyExists, err := s.repository.IsExists(ctx, email)
+	if err != nil {
+		return fmt.Errorf("checking existing subscription: %w", err)
+	}
+	if alreadyExists {
+		return domain.ErrAlreadySubscribed
+	}
+
 	token, err := domain.GenerateToken()
 	if err != nil {
 		return err
