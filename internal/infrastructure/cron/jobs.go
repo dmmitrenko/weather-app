@@ -19,7 +19,7 @@ func StartJobs(proc *application.SubscriptionProcessor) *cron.Cron {
 		proc.Process(context.Background(), domain.Hourly)
 	})
 
-	scheduler.AddFunc("*/1 * * * *", func() {
+	scheduler.AddFunc("0 0 * * *", func() {
 		proc.Process(context.Background(), domain.Daily)
 	})
 	scheduler.Start()

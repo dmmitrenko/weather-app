@@ -21,8 +21,8 @@ func NewSubscriptionHandler(r *mux.Router, svc *application.SubscriptionService)
 	}
 
 	r.Handle("/api/subscribe", WithErrorHandling(h.Subscribe)).Methods(http.MethodPost)
-	r.Handle("/api/confirm/{token}", WithErrorHandling(h.Confirm)).Methods(http.MethodGet)
-	r.Handle("/api/unsubscribe/{token}", WithErrorHandling(h.Unsubscribe)).Methods(http.MethodGet)
+	r.Handle("/api/confirm/{token:.*}", WithErrorHandling(h.Confirm)).Methods(http.MethodGet)
+	r.Handle("/api/unsubscribe/{token:.*}", WithErrorHandling(h.Unsubscribe)).Methods(http.MethodGet)
 }
 
 func (h SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) error {
@@ -55,7 +55,15 @@ func (h SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) e
 		return domain.ErrInvalidInput
 	}
 
-	return h.svc.Subscribe(r.Context(), req.Email, freq, req.City)
+	if err := h.svc.Subscribe(r.Context(), req.Email, freq, req.City); err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Subscription successful. Confirmation email sent."))
+
+	return nil
 }
 
 func (h SubscriptionHandler) Confirm(w http.ResponseWriter, r *http.Request) error {

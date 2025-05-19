@@ -20,7 +20,7 @@ func WithErrorHandling(fn AppHandler) http.HandlerFunc {
 
 		switch {
 		case errors.Is(err, domain.ErrInvalidInput):
-			code, msg = http.StatusBadRequest, "Invalid input"
+			code, msg = http.StatusBadRequest, "Invalid request"
 		case errors.Is(err, domain.ErrAlreadySubscribed):
 			code, msg = http.StatusConflict, "Email already subscribed"
 		case errors.Is(err, domain.ErrSubscriptionNotFound):

@@ -3,10 +3,13 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 
 	"github.com/dmmitrenko/weather-app/internal/domain"
 	"github.com/gorilla/mux"
 )
+
+var cityRegex = regexp.MustCompile(`^[A-Za-z]+$`)
 
 type WeatherResponse struct {
 	Temperature float64 `json:"temperature"`
@@ -23,24 +26,18 @@ func NewWeatherHandler(r *mux.Router, w domain.WeatherProvider) {
 		weatherProvider: w,
 	}
 
-	r.HandleFunc("/api/weather", h.GetCurrentWeather).Methods("GET")
+	r.HandleFunc("/api/weather", WithErrorHandling(h.GetCurrentWeather)).Methods("GET")
 }
 
-func (h *WeatherHandler) GetCurrentWeather(w http.ResponseWriter, r *http.Request) {
+func (h *WeatherHandler) GetCurrentWeather(w http.ResponseWriter, r *http.Request) error {
 	city := r.URL.Query().Get("city")
-	if city == "" {
-		http.Error(w, "city required", http.StatusBadRequest)
-		return
+	if city == "" || !cityRegex.MatchString(city) {
+		return domain.ErrInvalidInput
 	}
 
 	weather, err := h.weatherProvider.GetCurrentWeather(r.Context(), city)
 	if err != nil {
-		if err == domain.ErrCityNotFound {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	resp := WeatherResponse{
@@ -52,4 +49,6 @@ func (h *WeatherHandler) GetCurrentWeather(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
+
+	return nil
 }
