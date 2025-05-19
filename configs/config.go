@@ -37,9 +37,13 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	expanded := os.ExpandEnv(string(data))
+
 	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
+	if err := yaml.Unmarshal([]byte(expanded), &cfg); err != nil {
 		return nil, err
 	}
+
 	return &cfg, nil
 }

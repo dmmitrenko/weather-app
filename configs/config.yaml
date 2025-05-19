@@ -1,0 +1,22 @@
+server:
+  address: ":8080"
+
+weather_api:
+  key: ${WEATHERAPI_KEY}
+
+token:
+  secret: ${SUBSCRIPTION_TOKEN_SECRET}
+
+smtp_config:
+  host: "smtp.gmail.com"
+  port: 587
+  username: "dmmytrenko@gmail.com"
+  password: ${SMTP_PASSWORD}
+  from: "serhii"
+
+db:
+  host: db
+  port: 5432
+  user: postgres
+  pass: postgrespass
+  name: weatherapp

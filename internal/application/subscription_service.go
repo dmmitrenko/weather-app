@@ -2,8 +2,10 @@ package application
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dmmitrenko/weather-app/internal/domain"
+	"github.com/dmmitrenko/weather-app/internal/utils"
 )
 
 type SubscriptionService struct {
@@ -28,7 +30,11 @@ func (s *SubscriptionService) Subscribe(ctx context.Context, email string, freq 
 		return err
 	}
 
-	s.emailSender.Send(ctx, email, "Subscription confirmation", token)
+	subject, body, err := utils.BuildSubscriptionConfirmationMessage(email, city, token)
+	if err != nil {
+		fmt.Printf("building message for %s failed: %v\n", email, err)
+	}
+	s.emailSender.Send(ctx, email, subject, body)
 
 	sub := domain.Subscription{
 		City:      city,

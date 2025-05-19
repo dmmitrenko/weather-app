@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   db:
     image: postgres:14
@@ -15,31 +17,30 @@ services:
     image: migrate/migrate:latest
     depends_on:
       - db
-    command: [
-      "-path", "/scripts",
-      "-database", "postgres://postgres:postgrespass@db:5432/weatherapp?sslmode=disable",
-      "up"
-    ]
     volumes:
-      - ./scripts:/scripts
+      - ./scripts:/migrations
+    entrypoint:
+      - migrate
+      - "-path"
+      - "/migrations"
+      - "-database"
+      - "postgres://postgres:postgrespass@db:5432/weatherapp?sslmode=disable"
+      - "up"
 
   app:
     build: .
+    env_file:
+      - .env
+    environment:
+      - WEATHERAPI_KEY
+      - SUBSCRIPTION_TOKEN_SECRET
+      - SMTP_PASSWORD
     restart: unless-stopped
     depends_on:
       - migrate
       - db
     ports:
       - "8080:8080"
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASS: postgrespass
-      DB_NAME: weatherapp
-
-      WEATHERAPI_KEY: ${WEATHERAPI_KEY}
-      SUBSCRIPTION_TOKEN_SECRET: ${SUBSCRIPTION_TOKEN_SECRET}
     volumes:
       - ./configs/config.yaml:/app/configs/config.yaml:ro
 

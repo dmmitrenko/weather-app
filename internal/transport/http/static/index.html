@@ -88,7 +88,7 @@
 
     <section>
       <h2>Get current weather</h2>
-      <form id="weather-form" method="get" action="/weather">
+      <form id="weather-form" method="get" action="/api/weather">
         <label for="city-weather">City</label>
         <input type="text" id="city-weather" name="city" placeholder="Odesa" required />
         <button type="submit">Get the weather forecast</button>
@@ -98,7 +98,7 @@
 
     <section>
       <h2>Subscribe to weather forecasts</h2>
-      <form id="subscribe-form" method="post" action="/subscribe">
+      <form id="subscribe-form" method="post" action="/api/subscribe">
         <label for="email-sub">Email</label>
         <input type="email" id="email-sub" name="email" placeholder="you@example.com" required />
 
@@ -119,7 +119,7 @@
 
     <section>
       <h2>Subscription confirmation</h2>
-      <form id="confirm-form" method="get" action="/confirm/">
+      <form id="confirm-form" method="get" action="/api/confirm/">
         <label for="token-confirm">Confirmation token</label>
         <input type="text" id="token-confirm" name="token" placeholder="abcdef123456" required />
         <button type="submit">Confirm</button>
@@ -129,7 +129,7 @@
 
     <section>
       <h2>Unsubscribe</h2>
-      <form id="unsubscribe-form" method="get" action="/unsubscribe/">
+      <form id="unsubscribe-form" method="get" action="/api/unsubscribe/">
         <label for="token-unsub">Unsubscribe token</label>
         <input type="text" id="token-unsub" name="token" placeholder="uvwxyz7890" required />
         <button type="submit">Unsubscribe</button>
@@ -147,7 +147,7 @@
       resultEl.textContent = 'Loading...';
 
       try {
-        const res = await fetch(`/weather?city=${encodeURIComponent(city)}`);
+        const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
         if (!res.ok) {
           const errMsg = await res.text();
           throw new Error(errMsg || `Error: ${res.status}`);

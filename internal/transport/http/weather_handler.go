@@ -23,7 +23,7 @@ func NewWeatherHandler(r *mux.Router, w domain.WeatherProvider) {
 		weatherProvider: w,
 	}
 
-	r.HandleFunc("/weather", h.GetCurrentWeather).Methods("GET")
+	r.HandleFunc("/api/weather", h.GetCurrentWeather).Methods("GET")
 }
 
 func (h *WeatherHandler) GetCurrentWeather(w http.ResponseWriter, r *http.Request) {

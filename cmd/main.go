@@ -8,11 +8,11 @@ import (
 
 	"github.com/dmmitrenko/weather-app/configs"
 	"github.com/dmmitrenko/weather-app/internal/application"
-	delivery "github.com/dmmitrenko/weather-app/internal/delivery/http"
 	"github.com/dmmitrenko/weather-app/internal/infrastructure/cron"
 	"github.com/dmmitrenko/weather-app/internal/infrastructure/emailing"
 	weatherapi "github.com/dmmitrenko/weather-app/internal/infrastructure/weather-api"
 	"github.com/dmmitrenko/weather-app/internal/repository"
+	delivery "github.com/dmmitrenko/weather-app/internal/transport/http"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
@@ -51,7 +51,7 @@ func main() {
 
 	subscriptionRepository := repository.NewSubscriptionRepository(db, cfg.Token.Secret)
 
-	processor := &application.SubscriptionProcessor{Repo: subscriptionRepository, Sender: email_sender}
+	processor := &application.SubscriptionProcessor{Repo: subscriptionRepository, Sender: email_sender, WeatherProvider: client}
 	subscriptionService := application.NewSubscriptionService(subscriptionRepository, email_sender)
 
 	r := mux.NewRouter()

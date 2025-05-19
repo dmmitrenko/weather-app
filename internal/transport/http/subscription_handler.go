@@ -20,9 +20,9 @@ func NewSubscriptionHandler(r *mux.Router, svc *application.SubscriptionService)
 		svc: svc,
 	}
 
-	r.Handle("/subscribe", WithErrorHandling(h.Subscribe)).Methods(http.MethodPost)
-	r.Handle("/confirm/{token}", WithErrorHandling(h.Confirm)).Methods(http.MethodGet)
-	r.Handle("/unsubscribe/{token}", WithErrorHandling(h.Unsubscribe)).Methods(http.MethodGet)
+	r.Handle("/api/subscribe", WithErrorHandling(h.Subscribe)).Methods(http.MethodPost)
+	r.Handle("/api/confirm/{token}", WithErrorHandling(h.Confirm)).Methods(http.MethodGet)
+	r.Handle("/api/unsubscribe/{token}", WithErrorHandling(h.Unsubscribe)).Methods(http.MethodGet)
 }
 
 func (h SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) error {
