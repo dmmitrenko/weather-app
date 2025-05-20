@@ -48,7 +48,7 @@ The application supports email delivery using Gmail SMTP.
 Steps to enable Gmail SMTP:
 1. Go to Google Account Security
 2. Enable 2-Step Verification if not already enabled.
-3. Under “Signing in to Google”, click App Passwords.
+3. Under “Signing in to Google”, click App Passwords. (https://myaccount.google.com/apppasswords)
 4. Create a new App Password for “Mail” + “Other (Custom name)” (e.g. Weather App)
 5. Use the generated password in your .env:
         ```env
