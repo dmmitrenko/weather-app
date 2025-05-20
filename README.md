@@ -18,7 +18,7 @@ docker compose up -d app
 - API base URL: http://localhost:8080/api
 
 > ⚠️ **Note:**  
-> The docker compose up command may sometimes not work as intended (migration may happen before the database is created)! Therefore, it is important to start containers sequentially, as specified in the instructions.
+> The **docker compose up** command may sometimes not work as intended (migration may happen before the database is created)! Therefore, it is important to start containers sequentially, as specified in the instructions.
 
 > ⚠️ **Note:**  
 > The application requires a properly configured `.env` file containing credentials and API keys. Without it, email delivery and weather updates will not function correctly.
