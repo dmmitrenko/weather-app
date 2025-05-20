@@ -1,6 +1,8 @@
 # 🌦 Weather App
 > A Go application for retrieving current weather and subscribing to weather updates via email.
 
+**The application is available at: https://weatherapp-app.azurewebsites.net/**
+
 ### ⚙️ Requirements
 
 - Docker + Docker Compose
@@ -16,16 +18,16 @@ docker compose up -d app
 - API base URL: http://localhost:8080/api
 
 > ⚠️ **Note:**  
-> The docker compose up command may sometimes not work as intended (migration may happen before the database is created)! Therefore, it is important to start containers sequentially, as specified in the instructions.
+> The **docker compose up** command may sometimes not work as intended (migration may happen before the database is created)! Therefore, it is important to start containers sequentially, as specified in the instructions.
 
 > ⚠️ **Note:**  
 > The application requires a properly configured `.env` file containing credentials and API keys. Without it, email delivery and weather updates will not function correctly.
 
 Example env file:
 ```env
-SMTP_PASSWORD=""
-WEATHERAPI_KEY="7"
-SUBSCRIPTION_TOKEN_SECRET="It is not necessary to accept everything as true, one must only accept it as necessary"
+SMTP_PASSWORD="smtp_pass"
+WEATHERAPI_KEY="api_key"
+SUBSCRIPTION_TOKEN_SECRET="It is not necessary to accept everything as true"
 ```
 
 
@@ -46,7 +48,7 @@ The application supports email delivery using Gmail SMTP.
 Steps to enable Gmail SMTP:
 1. Go to Google Account Security
 2. Enable 2-Step Verification if not already enabled.
-3. Under “Signing in to Google”, click App Passwords.
+3. Under “Signing in to Google”, click App Passwords. (https://myaccount.google.com/apppasswords)
 4. Create a new App Password for “Mail” + “Other (Custom name)” (e.g. Weather App)
 5. Use the generated password in your .env:
         ```env
