@@ -1,6 +1,8 @@
 # 🌦 Weather App
 > A Go application for retrieving current weather and subscribing to weather updates via email.
 
+**The application is available at: https://weatherapp-app.azurewebsites.net/**
+
 ### ⚙️ Requirements
 
 - Docker + Docker Compose
