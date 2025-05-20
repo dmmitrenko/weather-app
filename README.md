@@ -13,6 +13,7 @@ To run the app locally:
 docker compose up -d db
 docker compose run --rm migrate
 docker compose up -d app
+docker compose run --rm e2e (if you want to run e2e tests)
 ```
 - Web interface (subscription form): http://localhost:8080
 - API base URL: http://localhost:8080/api
