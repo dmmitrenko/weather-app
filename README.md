@@ -25,8 +25,8 @@ docker compose up -d app
 
 Example env file:
 ```env
-SMTP_PASSWORD=""
-WEATHERAPI_KEY="7"
+SMTP_PASSWORD="smtp_pass"
+WEATHERAPI_KEY="api_key"
 SUBSCRIPTION_TOKEN_SECRET="It is not necessary to accept everything as true, one must only accept it as necessary"
 ```
 
